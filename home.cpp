@@ -1,8 +1,16 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-int id = -1;
+int ID = -1;
+int id;
+    int c1=177,c2=219;
+
+map<int,pair<string,vector<vector<char>>>>layoutsForFeedback;
+map<int,pair<string,string>>feed;
 map<string, pair<string, pair<string, int>>> acct; // mail- pass- user-id
+map<string, pair<string, pair<string, int>>> des;
+
+
 
 bool isStrongPassword(string& password) {
     // Check the length of the password
@@ -78,6 +86,71 @@ void printCompanyInfo() {
 }
 
 
+
+void printlayout(vector<vector<char>> fullLayout)
+        {
+            int i, j,length=fullLayout.size(),width=fullLayout[0].size();
+            for (i = 0; i < length; i++) {
+                // Calculate padding for centering each row
+                int padding = (80 - (width * 2)) / 2;
+        
+                // Print leading padding
+                cout << setw(padding) << "";
+        
+                for (j = 0; j < width; j++) {
+                    if (fullLayout[i][j] == '*')
+                        printf("%c",c2);  //c2cout << ". ";
+                    else{
+                        if(fullLayout[i][j]=='.')
+                            printf("%c",c2);  //c2cout << ". ";
+                        else
+                            printf("%c",c1);  //cout << workspaceLayout[i][j] << " ";
+                    }
+                        
+                }
+        
+                // Print trailing padding and move to the next line
+                cout << setw(padding) << "" << endl;
+            }
+            cout<<endl;
+            cout << string(80, '=') << endl;
+            cout<<endl;
+        }
+
+        void handleFeedback()
+         {
+            if (!layoutsForFeedback.empty()) 
+            {
+                cout << "Layouts awaiting feedback:\n";
+                char buf[1024];
+               // bzero(buf,sizeof(buf));
+                for (const auto& entry : layoutsForFeedback) {
+                    int userId = entry.first;
+                    const string& layoutName = entry.second.first;
+                    const vector<vector<char>>& fullLayout = entry.second.second;
+                    sprintf(buf,"Layout Name : ",layoutName);
+                    printCentered(buf,80);
+                    printlayout(fullLayout);
+                   // bzero(buf,sizeof(buf));
+                    //cout << " User ID: " << userId << ", Layout Name: " << layoutName << endl;
+                    printCentered("Give your Feedback",80);
+                    cin>>buf;
+                    printCentered("Thanks For providing Feedback",80);
+                    feed[userId]={layoutName,buf};
+                    // Provide feedback logic here
+                    // You can ask the designer to enter feedback for each layout
+
+                    // Clear layouts after feedback is provided
+                }
+                layoutsForFeedback.clear();
+            }
+            else
+            {
+                cout << "No layouts awaiting feedback.\n";
+            }
+        }
+
+ 
 class Users {
 public:
     string username;
@@ -85,12 +158,79 @@ public:
     string pass;
     int userid;
     map<string,vector<vector<char>>>allLayouts;
+
+ //   vector<pair<int,string>> layoutsForFeedback;
+
     void putdata(string nm,string mail,string ps){
         username=nm;
         mailid=mail;
         pass=ps;
         userid=id;
     }
+
+    
+    void requestFeedback(const string& layoutName) {
+        vector<vector<char>>lay;
+        for(auto it:allLayouts){
+            if(it.first==layoutName){
+                lay=it.second;
+                break;
+            }
+        }
+        layoutsForFeedback[id]={layoutName,lay};
+        printCentered("Request for feedback has been successfully sent.",80);
+        printCentered("You can check the feedback after 2 working hours.",80);
+    }
+
+    void printfeedback(string layname, string feedback)
+    {
+
+        int i, j;
+        cout<<"Layout Name : "<<layname<<endl;
+        cout<<endl;
+        cout << string(80, '=') << endl;
+        cout<<endl;
+
+      //  map<string,vector<vector<char>>>allLayouts;
+        vector<vector<char>>tmp;
+        for(auto it:allLayouts){
+            if(it.first==layname){
+                    tmp=it.second;
+                    int length=tmp.size();
+                    int width=tmp[0].size();
+                    for (i = 0; i < length; i++) {
+                    // Calculate padding for centering each row
+                    int padding = (80 - (width * 2)) / 2;
+            
+                    // Print leading padding
+                    cout << setw(padding) << "";
+            
+                    for (j = 0; j < width; j++) {
+                        if (tmp[i][j] == '*')
+                            printf("%c",c2);  //c2cout << ". ";
+                        else{
+                            if(tmp[i][j]=='.')
+                                printf("%c",c2);  //c2cout << ". ";
+                            else
+                                printf("%c",c1);  //cout << workspaceLayout[i][j] << " ";
+                        }
+                            
+                    }
+            
+                    // Print trailing padding and move to the next line
+                    cout << setw(padding) << "" << endl;
+                }
+            }
+        }
+        printCentered("Our Expert's Feedback - ",80);
+        printCentered(feedback,80);
+        cout<<endl;
+        cout << string(80, '=') << endl;
+         cout<<endl;
+
+    }
+
+
 
     void addLayout(vector<vector<char>>tmp,string type){
         allLayouts[type]=tmp;
@@ -106,7 +246,10 @@ public:
         // Print the layout, row by row
         for (const vector<char>& row : layout) {
             for (char cell : row) {
-                cout << cell << ' ';
+                if(cell=='.')
+                    printf("%c",c2);  //c2cout << ". ";
+                else
+                    printf("%c",c1);  //cout << workspaceLayout[i][j] << " ";
             }
             cout << '\n';
         }
@@ -139,6 +282,8 @@ public:
     }
 };
 
+
+        
 
 
 
@@ -414,7 +559,35 @@ public:
                 }
             }
         }
-        for(i=0;i<length;i++){
+        if (workspaceLayout[0][0] == '.' && canPlaceFurniture(furniture, 0, 0, 1)) {
+            placeFurniture(furniture, 0, 0, 1);
+            return;
+        } else if (workspaceLayout[0][width - 1] == '.' && canPlaceFurniture(furniture, 0, width - 1, 0)) {
+            placeFurniture(furniture, 0, width - 1, 0);
+            return;
+        } else if (workspaceLayout[length - 1][0] == '.' && canPlaceFurniture(furniture, length - 1, 0, 0)) {
+            placeFurniture(furniture, length - 1, 0, 0);
+            return;
+        }
+
+        bool placedInMiddle = false;
+
+        for (int i = 1; i < length - 1; i++) {
+            for (int j = 1; j < width - 1; j++) {
+                if (workspaceLayout[i][j] == '.' && canPlaceFurniture(furniture, i, j, 1)) {
+                    placeFurniture(furniture, i, j, 1);
+                    placedInMiddle = true;
+                    break;
+                }
+            }
+            if (placedInMiddle) {
+                break;
+            }
+        }
+        if(placedInMiddle==false)
+            cout << "You cannot place your furniture at the location you gave\n";
+
+     /*  for(i=0;i<length;i++){
             for(j=0;j<width;j++){
                 if(workspaceLayout[i][j]=='.' && canPlaceFurniture(furniture,i,j,1)){
                     placeFurniture(furniture, i, j, 1);
@@ -425,7 +598,7 @@ public:
                     return;
                 }
             }
-        }
+        }*/
       /*  bool plc=0;
         for(i=0;i<length;i++){
             for(j=0;j<width;j++){
@@ -606,6 +779,9 @@ public:
         return totalFurnitureArea / (length * width);
     }
 
+
+   
+
     void generateWorkspaceLayout()  {
         int i, j;
         cout<<"Layout Name : "<<getRoomType()<<endl;
@@ -621,9 +797,14 @@ public:
        
             for (j = 0; j < width; j++) {
                 if (workspaceLayout[i][j] == '*')
-                    cout << ". ";
-                else
-                    cout << workspaceLayout[i][j] << " ";
+                    printf("%c",c2);  //c2cout << ". ";
+                else{
+                    if(workspaceLayout[i][j]=='.')
+                        printf("%c",c2);  //c2cout << ". ";
+                    else
+                        printf("%c",c1);  //cout << workspaceLayout[i][j] << " ";
+                }
+                    
             }
        
             // Print trailing padding and move to the next line
@@ -644,7 +825,7 @@ int main() {
     Users users[100]; // Array of Users
     Room workspace[100]; // Array of Rooms
     Furniture furniture[100]; // Array of Furnitures
-   
+   des["dd@gmail.com"] = {"12345", {"varsha", 990}};
    int exit = 0, exit2 = 0;
     int t, opt, opt2;
     string user, mail, p1, p2;
@@ -652,219 +833,252 @@ int main() {
  
         printCompanyInfo();
 
-    printCentered("What would you like to do?", 80);
-    printCentered("1. Register", 80);
-    printCentered("2. Log in", 80);
-     cout<<endl;
-   cout << string(80, '=') << endl;
-    cout<<endl;
-    cin >> t;
-   
-   
-    if (t == 1) {
-        cout << "Enter your Name : ";
-        cin >> user;
-        mailid:
-        cout << "Enter your mail id : ";
-        cin >> mail;
-        if(isValidEmail(mail)==0) {
-            cout<<"Invalid Mail format!!!\nTry again\n";
-            goto mailid;
-        }
+    int my;
+    printCentered("Tell me Who are you!!! ( 1. Customer 2. Interior Designer )",80);
+    cin>>my;
+    if(my==2) 
+    {
+        printCentered("Please Log in to view our Workspace Layouts",80);
         while (1) {
-            pass:
-            cout << "Enter your password : ";
-            cin >> p1;
-            /*if(isStrongPassword(p1)==0) {
-                cout<<"Your password is not so strong!!!\nTry again\n";
-                goto pass;
-            }*/
-            cout << "Confirm Password : ";
-            cin >> p2;
-            if (p1 == p2)
-                break;
-            else
-                cout << "Passwords don't match!!!\nPlease Try again \n";
+                cout << "Enter your mail id : ";
+                cin >> mail;
+                cout << "Enter your password : ";
+                cin >> p1;
+                if (des[mail].first == p1) {
+                    cout << "Successfully logged in!!\n";
+                    break;
+                } else
+                    cout << "Email id and password don't match!!!\nPlease Try again \n";
         }
-        id++;
-        acct[mail] = {p1, {user, id}};
-        cout << "Successfully created your account. Please now log in to use our application!!!\n";
+        handleFeedback();
+        printCentered("Thanks for helping our customers with your Valuable Feedback!!!",80);
+        cout<<endl;
+        cout << string(80, '=') << endl;
+        cout<<endl;
         goto start;
-        users[id].putdata(user,mail,p1);
     }
-    else {
-        while (1) {
+    else
+    {
+        start2: 
+        printCentered("What would you like to do?", 80);
+        printCentered("1. Register", 80);
+        printCentered("2. Log in", 80);
+        cout<<endl;
+    cout << string(80, '=') << endl;
+        cout<<endl;
+        cin >> t;
+    
+    
+        if (t == 1) {
+            cout << "Enter your Name : ";
+            cin >> user;
+            mailid:
             cout << "Enter your mail id : ";
             cin >> mail;
-            cout << "Enter your password : ";
-            cin >> p1;
-            if (acct[mail].first == p1) {
-                cout << "Successfully logged in!!\n";
-                break;
-            } else
-                cout << "Email id and password don't match!!!\nPlease Try again \n";
-        }
-    }
-
-    while (true) {
-         cout<<endl;
-         cout << string(80, '=') << endl;
-          cout<<endl;
-        printCentered("What do you want to do?", 80);
-        printCentered("1. View all Workspaces", 80);
-        printCentered("2. Create a new Workspace", 80);
-        printCentered("3. Update a Workspace", 80);
-        printCentered("4. Remove Workspace", 80);
-        printCentered("5. Get Feedback",80);
-        printCentered("5. Log out", 80);
-         cout<<endl;
-        cout << string(80, '=') << endl;
-         cout<<endl;
-        cin >> opt;
-        exit = 0;
-
-        switch (opt) {
-            case 1:{
-                users[id].getallLayouts();
-                break;
+            if(isValidEmail(mail)==0) {
+                cout<<"Invalid Mail format!!!\nTry again\n";
+                goto mailid;
             }
-            case 2: {
-                workspace[id].getdata();
-                while (1) {
-                     cout<<endl;
-                    cout << string(80, '=') << endl;
-                     cout<<endl;
-                    printCentered("What do you want to do?", 80);
-                    printCentered("1. Add furnitures", 80);
-                    printCentered("2. Remove Furnitures", 80);
-                    printCentered("3. Save and Exit", 80);
-                     cout<<endl;
-                    cout << string(80, '=') << endl;
-                     cout<<endl;
-                    cin >> opt2;
-                    exit2 = 0;
-                    switch (opt2) {
-                        case 1: {
-                            int t;
-                            string nm;
-                            furniture[id].getdata();
-                            cout<<"Do you want to place it near an existing furniture ( 0-no 1- yes) : ";
-                            cin>>t;
-                            if(t==1){
-                                cout<<"Enter the furniture to which you need to place this : ";
-                                cin>>nm;
-                                workspace[id].addexistfurn(furniture[id],nm);
-                            }
-                            else
-                                workspace[id].addFurniture(furniture[id]);
-                            workspace[id].generateWorkspaceLayout();
-                            double spaceUtilization = workspace[id].calculateSpaceUtilization();
-                            cout << "Space Utilization: " << (spaceUtilization * 100) << "%" << endl;
-                            int ch;
-                         
-                            cout << "Are you fine with the furniture placement?? (0 - No 1 - Yes) : ";
-                            cin >> ch;
-                            int x, y;
-                            if(ch==0 && t==1){
-                                while(ch==0 ){
-                                    workspace[id].existalternate(furniture[id]);
-                                //    cout<<"hii";
-                                    workspace[id].alternateexistfurn(furniture[id],nm);
-                                    workspace[id].generateWorkspaceLayout();
-                                    cout << "Are you fine with the furniture placement?? (0 - No 1 - Yes) : ";
-                                    cin >> ch;
+            while (1) {
+                pass:
+                cout << "Enter your password : ";
+                cin >> p1;
+                if(isStrongPassword(p1)==0) {
+                    cout<<"Your password is not so strong!!!\nTry again\n";
+                    goto pass;
+                }
+                cout << "Confirm Password : ";
+                cin >> p2;
+                if (p1 == p2)
+                    break;
+                else
+                    cout << "Passwords don't match!!!\nPlease Try again \n";
+            }
+            ID++;
+            acct[mail] = {p1, {user, ID}};
+            cout << "Successfully created your account. Please now log in to use our application!!!\n";
+            goto start2;
+            users[ID].putdata(user,mail,p1);
+        }
+        else {
+            while (1) {
+                cout << "Enter your mail id : ";
+                cin >> mail;
+                cout << "Enter your password : ";
+                cin >> p1;
+                if (acct[mail].first == p1) {
+                    cout << "Successfully logged in!!\n";
+                    id=acct[mail].second.second;
+                    break;
+                } else
+                    cout << "Email id and password don't match!!!\nPlease Try again \n";
+            }
+        }
+
+        while (true) {
+            cout<<endl;
+            cout << string(80, '=') << endl;
+            cout<<endl;
+            printCentered("What do you want to do?", 80);
+            printCentered("1. View all Workspaces", 80);
+            printCentered("2. Create a new Workspace", 80);
+            printCentered("3. Remove Workspace", 80);
+            printCentered("4. Share Layout for Feedback",80);
+            printCentered("5. View Layout Feedback",80);
+            printCentered("6. Log out", 80);
+            cout<<endl;
+            cout << string(80, '=') << endl;
+            cout<<endl;
+            cin >> opt;
+            exit = 0;
+
+            switch (opt) {
+                case 1:{
+                    users[id].getallLayouts();
+                    break;
+                }
+                case 2: {
+                    workspace[id].getdata();
+                    while (1) {
+                        cout<<endl;
+                        cout << string(80, '=') << endl;
+                        cout<<endl;
+                        printCentered("What do you want to do?", 80);
+                        printCentered("1. Add furnitures", 80);
+                        printCentered("2. Remove Furnitures", 80);
+                        printCentered("3. Save and Exit", 80);
+                        cout<<endl;
+                        cout << string(80, '=') << endl;
+                        cout<<endl;
+                        cin >> opt2;
+                        exit2 = 0;
+                        switch (opt2) {
+                            case 1: {
+                                int t;
+                                string nm;
+                                furniture[id].getdata();
+                                cout<<"Do you want to place it near an existing furniture ( 0-no 1- yes) : ";
+                                cin>>t;
+                                if(t==1){
+                                    cout<<"Enter the furniture to which you need to place this : ";
+                                    cin>>nm;
+                                    workspace[id].addexistfurn(furniture[id],nm);
                                 }
-                            }
-                            else {
-                                while (ch == 0) {
-                                  /*  int x, y;
-                                    cout << "Enter the x-coordinate where you want to place : ";
-                                    cin >> x;
-                                    cout << "Enter the y-coordinate where you want to place : ";
-                                    cin >> y;
-                                    bool done = 0;
-                                    workspace[id].addcoordinatesfurn(furniture[id], x, y, done);
-                                    if (done == 1)
-                                        cout << "You cannot place your furniture at the location you gave\n";
-                                    workspace[id].generateWorkspaceLayout();
-                                    double spaceUtilization = workspace[id].calculateSpaceUtilization();
-                                    cout << "Space Utilization: " << (spaceUtilization * 100) << "%" << endl;*/
-                                   
-                                    workspace[id].alternatepos(furniture[id]);
-                                    workspace[id].generateWorkspaceLayout();
-                                //    workspace[id].generate();
-                                    cout << "Are you fine with the furniture placement?? (0 - No 1 - Yes) : ";
-                                    cin >> ch;
+                                else
+                                    workspace[id].addFurniture(furniture[id]);
+                                
+                                workspace[id].generateWorkspaceLayout();
+                                double spaceUtilization = workspace[id].calculateSpaceUtilization();
+                                cout << "Space Utilization: " << (spaceUtilization * 100) << "%" << endl;
+                                int ch;
+                            
+                                cout << "Are you fine with the furniture placement?? (0 - No 1 - Yes) : ";
+                                cin >> ch;
+                                int x, y;
+                                if(ch==0 && t==1){
+                                    while(ch==0 ){
+                                        workspace[id].existalternate(furniture[id]);
+                                    //    cout<<"hii";
+                                        workspace[id].alternateexistfurn(furniture[id],nm);
+                                        workspace[id].generateWorkspaceLayout();
+                                        cout << "Are you fine with the furniture placement?? (0 - No 1 - Yes) : ";
+                                        cin >> ch;
+                                    }
                                 }
+                                else {
+                                    while (ch == 0) {
+                                    /*  int x, y;
+                                        cout << "Enter the x-coordinate where you want to place : ";
+                                        cin >> x;
+                                        cout << "Enter the y-coordinate where you want to place : ";
+                                        cin >> y;
+                                        bool done = 0;
+                                        workspace[id].addcoordinatesfurn(furniture[id], x, y, done);
+                                        if (done == 1)
+                                            cout << "You cannot place your furniture at the location you gave\n";
+                                        workspace[id].generateWorkspaceLayout();
+                                        double spaceUtilization = workspace[id].calculateSpaceUtilization();
+                                        cout << "Space Utilization: " << (spaceUtilization * 100) << "%" << endl;*/
+                                    
+                                        workspace[id].alternatepos(furniture[id]);
+                                        workspace[id].generateWorkspaceLayout();
+                                    //    workspace[id].generate();
+                                        cout << "Are you fine with the furniture placement?? (0 - No 1 - Yes) : ";
+                                        cin >> ch;
+                                    }
+                                }
+                                workspace[id].finalize(furniture[id]);
+                                break;
                             }
-                            workspace[id].finalize(furniture[id]);
-                            break;
+    
+                            case 2:{
+                                string fname;
+                                cout<<"Enter the furniture name which you want to remove :  ";
+                                cin>>fname;
+                                workspace[id].removeFurniture(furniture[id]);
+                                workspace[id].generateWorkspaceLayout();
+                                double spaceUtilization = workspace[id].calculateSpaceUtilization();
+                                cout << "Space Utilization: " << (spaceUtilization * 100) << "%" << endl;
+                                break;
+                            }
+                        
+                            case 3: {
+                                users[id].addLayout(workspace[id].getLayout(),workspace[id].getRoomType());
+                                exit2 = 1;
+                                cout << "Successfully saved Workspace.\n";
+                                break;
+                            }
+                            default: {
+                                cout << "Invalid choice. Please try again.\n";
+                                break;
+                            }
                         }
-   
-                        case 2:{
-                            string fname;
-                            cout<<"Enter the furniture name which you want to remove :  ";
-                            cin>>fname;
-                            workspace[id].removeFurniture(furniture[id]);
-                            workspace[id].generateWorkspaceLayout();
-                            double spaceUtilization = workspace[id].calculateSpaceUtilization();
-                            cout << "Space Utilization: " << (spaceUtilization * 100) << "%" << endl;
+                        if (exit2 == 1)
                             break;
-                        }
-                       
-                        case 3: {
-                            users[id].addLayout(workspace[id].getLayout(),workspace[id].getRoomType());
-                            exit2 = 1;
-                            cout << "Successfully saved Workspace.\n";
-                            break;
-                        }
-                        default: {
-                            cout << "Invalid choice. Please try again.\n";
-                            break;
+                    }
+                    break;
+                }
+                case 3:{
+                    users[id].getallLayouts();
+                    string lay;
+                    cout << "Enter the layout you want to delete : ";
+                    cin >> lay;
+                    users[id].deletelayout(lay);
+                    break;
+                }
+                case 4: {
+                    users[id].getallLayouts();
+                    string st;
+                    cout << "Enter the layout you want to share to get feedback : ";
+                    cin >> st;
+                    users[id].requestFeedback(st);
+                    break;
+                }
+                case 5:{
+
+                    //map<int,pair<string,string>>feed;
+                    for(auto it:feed){
+                        if(it.first==id){
+                            users[id].printfeedback(it.second.first,it.second.second);
                         }
                     }
-                    if (exit2 == 1)
-                        break;
+                    break;
                 }
-                break;
+                case 6: {
+                    printCentered("Thanks for choosing Room Sketchers.", 80);
+                    printCentered("Logged Out Successfully!", 80);
+                    exit = 1;
+                    break;
+                }
+                default: {
+                    printCentered("Invalid choice. Please try again.", 80);
+                    break;
+                }
             }
-            case 4:{
-                users[id].getallLayouts();
-                string lay;
-                cout << "Enter the layout you want to delete : ";
-                cin >> lay;
-                users[id].deletelayout(lay);
+            if (exit == 1)
                 break;
-            }
-            case 5:{
-                string st,msg;
-                users[id].getallLayouts();
-                printCentered("Enter the workspace which you want to send to get Feedback",80);
-                cout<<endl;
-                cin>>st;
-                PrintCentered("What message you want to additionally specify to get better feedback",80);
-                cout<<endl;
-                cin>>msg;
-                givedesignerinfo();
-                printCentered("Whi designer you want to share your layout ( Enter their Did) ",80);
-                cin>>id;
-                putfeedback(Did,st,msg);
-                break;
-            }
-            case 6: {
-                printCentered("Thanks for choosing Room Sketchers.", 80);
-                printCentered("Logged Out Successfully!", 80);
-                exit = 1;
-                break;
-            }
-            default: {
-                printCentered("Invalid choice. Please try again.", 80);
-                break;
-            }
         }
-        if (exit == 1)
-            break;
     }
-    goto start;
+     goto start;
     return 0;
 }
